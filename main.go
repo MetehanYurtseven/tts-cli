@@ -5,14 +5,15 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/perbu/tts-cli/tts"
-	"github.com/sashabaranov/go-openai"
 	"io"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/joho/godotenv"
+	"github.com/perbu/tts-cli/tts"
+	"github.com/sashabaranov/go-openai"
 )
 
 //go:embed .version
@@ -47,23 +48,32 @@ func run(ctx context.Context, stdout *os.File, args []string, env []string) erro
 	if *debugFlag {
 		fmt.Fprintln(stdout, "debug output enabled")
 	}
-	// Input file:
-	if flag.NArg() != 1 {
-		return fmt.Errorf("usage: %s <input-file>", args[0])
+	// Read input: auto-detect stdin pipe or file
+	var input []byte
+	var inputSource string
+	var err error
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		input, err = io.ReadAll(os.Stdin)
+		inputSource = "stdin"
+		if *outputFlag == "" {
+			*outputFlag = "output.mp3"
+		}
+	} else {
+		if flag.NArg() != 1 {
+			return fmt.Errorf("usage: %s <input-file>", args[0])
+		}
+		inputSource = flag.Arg(0)
+		input, err = os.ReadFile(inputSource)
+		if *outputFlag == "" {
+			*outputFlag = inputSource + ".mp3"
+		}
 	}
-	inputFileName := flag.Arg(0)
-
-	if *outputFlag == "" {
-		*outputFlag = inputFileName + ".mp3"
-	}
-
-	// Slurp the input file:
-	input, err := os.ReadFile(inputFileName)
 	if err != nil {
-		return fmt.Errorf("os.ReadFile: %w", err)
+		return fmt.Errorf("read input: %w", err)
 	}
 	if *debugFlag {
-		fmt.Fprintf(stdout, "read %d bytes from %s\n", len(input), inputFileName)
+		fmt.Fprintf(stdout, "read %d bytes from %s\n", len(input), inputSource)
 	}
 
 	apiKey := getEnvStr(env, apiKeyEnvVar, "")
