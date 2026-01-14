@@ -2,3 +2,7 @@
 *.aac
 *.txt
 /.env
+
+# nix
+result
+result-*
