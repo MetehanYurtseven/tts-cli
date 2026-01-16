@@ -21,6 +21,27 @@ tts-cli [-debug] <input file>
 This will read the input file, send it to the OpenAI API, and write the resulting audio to an mp3 file with the same
 name as the input file, but with ".mp3" appended.
 
+## Example: Speak the clipboard in wayland
+```bash
+wl-paste | tts-cli -o /dev/stdout | mpv -
+```
+This reads the clipboard using `wl-paste`, and pipes the output to `mpv` to play it.
+It also works with x11 using `xclip -selection clipboard -o` instead of `wl-paste`
+
+## Nix
+
+### Building
+```bash
+nix build .
+```
+This builds the binary to `result/bin/tts-cli`.
+
+### Development
+```bash
+nix develop
+```
+This opens a shell with the development requirements.
+
 ## Makefile for mp3 generation
 
 ```makefile
@@ -43,4 +64,3 @@ clean:
 
 .PHONY: all clean
 ```
-
