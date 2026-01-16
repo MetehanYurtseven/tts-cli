@@ -1,5 +1,7 @@
 # tts-cli
 
+> **Fork of [perbu/tts-cli](https://github.com/perbu/tts-cli)** with stdin support and Nix flake integration.
+
 This is a simple CLI wrapper around the OpenAI Text-to-Speech API. There where already a few of these, but they were
 written in Python. Dependency management in Python is a nightmare, so I decided to write my own in Go.
 
@@ -9,7 +11,7 @@ them while biking or walking.
 ## Installation
 
 ```bash
-go install github.com/perbu/tts-cli@latest
+go install github.com/MetehanYurtseven/tts-cli@latest
 ```
 
 ## Usage
@@ -30,17 +32,24 @@ It also works with x11 using `xclip -selection clipboard -o` instead of `wl-past
 
 ## Nix
 
+**For detailed examples, integration patterns, and advanced usage see [NIX.md](NIX.md)**
+
 ### Building
 ```bash
 nix build .
 ```
-This builds the binary to `result/bin/tts-cli`.
 
 ### Development
 ```bash
 nix develop
 ```
-This opens a shell with the development requirements.
+
+### Use as Flake Input
+```nix
+{
+  inputs.tts-cli.url = "github:MetehanYurtseven/tts-cli";
+}
+```
 
 ## Makefile for mp3 generation
 
